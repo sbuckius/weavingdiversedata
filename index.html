@@ -241,18 +241,10 @@
             background: linear-gradient(135deg, 
                 rgba(42, 24, 16, 0.65), 
                 rgba(42, 24, 16, 0.55));
-            opacity: 1;
             word-break: break-word;
             line-height: 1.2;
             font-weight: 400;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-        }
-
-        .weave-thread:hover .thread-overlay {
-            opacity: 1;
-            background: linear-gradient(135deg, 
-                rgba(42, 24, 16, 0.75), 
-                rgba(42, 24, 16, 0.65));
         }
 
         .legend {
@@ -404,15 +396,15 @@
 
     <script>
         // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAv7mCzyFnVE_pvLQyZsDacdqJo387oCts",
-  authDomain: "weavingdiversedata.firebaseapp.com",
-  projectId: "weavingdiversedata",
-  storageBucket: "weavingdiversedata.firebasestorage.app",
-  messagingSenderId: "331704605325",
-  appId: "1:331704605325:web:69b17c5590bc12e8c7a0c4",
-  measurementId: "G-R81YTMZ608"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyAv7mCzyFnVE_pvLQyZsDacdqJo387oCts",
+            authDomain: "weavingdiversedata.firebaseapp.com",
+            projectId: "weavingdiversedata",
+            storageBucket: "weavingdiversedata.firebasestorage.app",
+            messagingSenderId: "331704605325",
+            appId: "1:331704605325:web:69b17c5590bc12e8c7a0c4",
+            measurementId: "G-R81YTMZ608"
+        };
 
         // Initialize Firebase
         let db, answersCollection, onlineCollection, myPresenceDoc;
@@ -655,16 +647,30 @@ const firebaseConfig = {
                 exportBtn.textContent = '⏳ Capturing textile...';
                 exportBtn.disabled = true;
                 
+                // Wait a moment for any images to finish loading
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 const canvas = await html2canvas(document.querySelector('.weaving-canvas'), {
                     backgroundColor: 'rgba(42, 24, 16, 1)',
-                    scale: 2, // Higher quality
-                    logging: false,
+                    scale: 4, // Much higher quality (4x resolution)
+                    logging: true, // Enable logging to see what's happening
                     useCORS: true, // Allow cross-origin images
-                    allowTaint: true
+                    allowTaint: true, // Allow tainted canvas
+                    foreignObjectRendering: false, // Disable foreign object rendering
+                    imageTimeout: 15000, // Wait up to 15 seconds for images
+                    removeContainer: true,
+                    width: document.querySelector('.weaving-canvas').offsetWidth,
+                    height: document.querySelector('.weaving-canvas').offsetHeight,
+                    windowWidth: document.querySelector('.weaving-canvas').scrollWidth,
+                    windowHeight: document.querySelector('.weaving-canvas').scrollHeight
                 });
                 
                 // Convert to PNG and download
                 canvas.toBlob((blob) => {
+                    if (!blob) {
+                        throw new Error('Failed to create image blob');
+                    }
+                    
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
@@ -678,15 +684,21 @@ const firebaseConfig = {
                         exportBtn.textContent = originalText;
                         exportBtn.disabled = false;
                     }, 2000);
-                });
+                }, 'image/png');
                 
             } catch (error) {
-                console.error('Export error:', error);
-                exportBtn.textContent = '❌ Export failed';
+                console.error('Export error details:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                
+                exportBtn.textContent = '❌ Export failed - check console';
                 setTimeout(() => {
                     exportBtn.textContent = originalText;
                     exportBtn.disabled = false;
-                }, 2000);
+                }, 3000);
+                
+                // Show user-friendly error
+                alert('Export failed. Common fixes:\n\n1. Make sure all images are in the images/ folder\n2. Run from a web server (not file://)\n3. Check browser console (F12) for details');
             }
         }
 
