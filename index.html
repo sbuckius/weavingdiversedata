@@ -208,10 +208,11 @@
 
         #weavingPattern {
             display: grid;
-            gap: 2px;
+            gap: -2px;
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
+            position: relative;
         }
 
         .weave-thread {
@@ -309,17 +310,15 @@
 
         @keyframes weaveIn {
             from {
-                opacity: 0;
-                transform: scale(0.8) rotate(-5deg);
+                transform: scale(0.95);
             }
             to {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
+                transform: scale(1);
             }
         }
 
         .weave-thread.new {
-            animation: weaveIn 0.5s ease-out;
+            animation: weaveIn 0.3s ease-out;
         }
 
         @media (max-width: 1000px) {
@@ -532,6 +531,51 @@
             return 'plaid';
         }
 
+        // Calculate weaving pattern for each thread
+        function getWeavePattern(index, total, patternType) {
+            const row = Math.floor(index / Math.ceil(Math.sqrt(total)));
+            const col = index % Math.ceil(Math.sqrt(total));
+            
+            switch(patternType) {
+                case 'jacquard':
+                    // Complex pattern - unique for each answer
+                    return {
+                        rotation: (index * 17) % 360,
+                        offsetX: (Math.sin(index) * 5),
+                        offsetY: (Math.cos(index) * 5),
+                        weaveOver: (row + col) % 3 === 0
+                    };
+                    
+                case 'herringbone':
+                    // Diagonal zigzag pattern
+                    const diagonal = (row + col) % 8;
+                    return {
+                        rotation: diagonal < 4 ? 45 : -45,
+                        offsetX: (col % 2) * 3,
+                        offsetY: (row % 2) * 3,
+                        weaveOver: diagonal % 2 === 0
+                    };
+                    
+                case 'twill':
+                    // Diagonal lines pattern (over 2, under 2)
+                    return {
+                        rotation: ((row + col) % 4) * 5,
+                        offsetX: col * 0.5,
+                        offsetY: row * 0.5,
+                        weaveOver: (row + col) % 4 < 2
+                    };
+                    
+                case 'plaid':
+                    // Simple over-under grid
+                    return {
+                        rotation: 0,
+                        offsetX: (col % 2) * 2,
+                        offsetY: (row % 2) * 2,
+                        weaveOver: (row + col) % 2 === 0
+                    };
+            }
+        }
+
         // Get grid columns based on pattern and thread count
         function getGridColumns(patternType, count) {
             if (count <= 4) return 2;
@@ -578,18 +622,38 @@
                 const thread = document.createElement('div');
                 thread.className = 'weave-thread new';
                 
+                // Get weaving pattern for this position
+                const pattern = getWeavePattern(index, answers.length, patternType);
+                
                 // Create actual img element instead of background-image
                 const img = document.createElement('img');
                 const imagePath = getRandomImage();
                 img.src = imagePath;
                 img.alt = '';
-                img.loading = 'eager'; // Load immediately for better export
+                img.loading = 'eager';
+                
+                // Apply weaving pattern transforms
+                img.style.transform = `rotate(${pattern.rotation}deg)`;
+                
                 thread.appendChild(img);
+                
+                // Apply pattern positioning
+                thread.style.transform = `translateX(${pattern.offsetX}px) translateY(${pattern.offsetY}px)`;
                 
                 // Size based on uniqueness
                 const size = getThreadSize(answer);
-                thread.style.transform = `scale(${size})`;
-                thread.style.zIndex = Math.floor(size * 10);
+                const finalScale = size;
+                thread.style.transform += ` scale(${finalScale})`;
+                
+                // Z-index for over/under weaving
+                thread.style.zIndex = pattern.weaveOver ? 
+                    100 + Math.floor(size * 10) : 
+                    50 + Math.floor(size * 10);
+                
+                // Add subtle shadow for depth
+                if (pattern.weaveOver) {
+                    thread.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))';
+                }
                 
                 // Answer overlay
                 const overlay = document.createElement('div');
@@ -600,7 +664,7 @@
                 weavingPattern.appendChild(thread);
                 
                 // Remove 'new' class after animation
-                setTimeout(() => thread.classList.remove('new'), 500);
+                setTimeout(() => thread.classList.remove('new'), 300);
             });
             
             // Update stats
