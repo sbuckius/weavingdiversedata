@@ -974,10 +974,11 @@
                 // Wait a moment for any images to finish loading
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                const weavingCanvas = document.querySelector('.weaving-canvas');
+                // Capture ONLY the weaving pattern grid, not the entire canvas with padding
+                const weavingGrid = document.getElementById('weavingPattern');
                 
-                // First capture the single weaving
-                const singleCanvas = await html2canvas(weavingCanvas, {
+                // First capture the single weaving pattern (no padding/borders)
+                const singleCanvas = await html2canvas(weavingGrid, {
                     backgroundColor: '#500c32',
                     scale: 4, // Slightly lower scale since we're making it bigger
                     logging: false,
@@ -985,11 +986,7 @@
                     allowTaint: true,
                     foreignObjectRendering: false,
                     imageTimeout: 20000,
-                    removeContainer: true,
-                    width: weavingCanvas.offsetWidth,
-                    height: weavingCanvas.offsetHeight,
-                    windowWidth: weavingCanvas.scrollWidth,
-                    windowHeight: weavingCanvas.scrollHeight
+                    removeContainer: true
                 });
                 
                 // Create a larger canvas for the 3x3 tiled version
@@ -1000,17 +997,19 @@
                 tiledCanvas.height = singleCanvas.height * tilesY;
                 const ctx = tiledCanvas.getContext('2d');
                 
-                // Fill background
+                // Fill background (in case of any gaps)
                 ctx.fillStyle = '#500c32';
                 ctx.fillRect(0, 0, tiledCanvas.width, tiledCanvas.height);
                 
-                // Tile the weaving in a 3x3 grid
+                // Tile the weaving in a 3x3 grid - tiles touch perfectly
                 for (let y = 0; y < tilesY; y++) {
                     for (let x = 0; x < tilesX; x++) {
                         ctx.drawImage(
                             singleCanvas,
                             x * singleCanvas.width,
-                            y * singleCanvas.height
+                            y * singleCanvas.height,
+                            singleCanvas.width,
+                            singleCanvas.height
                         );
                     }
                 }
