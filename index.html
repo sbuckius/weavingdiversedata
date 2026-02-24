@@ -537,6 +537,7 @@
         let answers = [];
         let currentQuestionIndex = 0;
         let threadCount = 0;
+        let answerImages = {}; // Store which image belongs to which answer
 
         // DOM Elements
         const questionEl = document.getElementById('currentQuestion');
@@ -598,57 +599,62 @@
 
             switch (weaveStyle) {
                 case 'plain':
-                    // Simple alternating
-                    patternIndex = ((x + y) % 2 === 0) ? x : y;
+                    // Simple checkerboard alternating
+                    patternIndex = (x + y) % totalAnswers;
                     break;
 
                 case 'twill':
-                    // Diagonal lines
-                    patternIndex = (x + y);
+                    // Diagonal lines going bottom-left to top-right
+                    patternIndex = (x + y) % totalAnswers;
                     break;
 
                 case 'satin':
-                    // Satin weave (5-shaft)
-                    patternIndex = (x * 5 + y * 3);
+                    // Satin weave - scattered pattern
+                    patternIndex = (x * 3 + y * 5) % totalAnswers;
                     break;
 
                 case 'basket':
-                    // 2x2 basket weave
-                    patternIndex = ((Math.floor(x / 2) + Math.floor(y / 2)) % 2 === 0) ? x : y;
+                    // 2x2 basket weave blocks
+                    patternIndex = (Math.floor(x / 2) + Math.floor(y / 2)) % totalAnswers;
                     break;
 
                 case 'pointed':
-                    // Pointed twill (zigzag)
-                    const zig = Math.abs((x % 8) - 4);
-                    patternIndex = (y % 8 === zig) ? x : y;
+                    // Pointed twill - creates zigzag chevron
+                    const halfWidth = 4;
+                    const zigzag = (y % (halfWidth * 2)) < halfWidth ? 
+                        (x + y) % totalAnswers : 
+                        (x - y + halfWidth) % totalAnswers;
+                    patternIndex = Math.abs(zigzag);
                     break;
 
                 case 'herringbone':
-                    // Herringbone (directional twill)
-                    const dir = (Math.floor(y / 8) % 2 === 0) ? 1 : -1;
-                    patternIndex = (x + dir * y);
+                    // Herringbone - diagonal changes direction periodically
+                    const blockSize = 6;
+                    const direction = Math.floor(y / blockSize) % 2 === 0 ? 1 : -1;
+                    patternIndex = Math.abs((x + direction * y)) % totalAnswers;
                     break;
 
                 case 'warp_rib':
-                    // Warp-faced rib
-                    patternIndex = (x % 4 < 3) ? x : y;
+                    // Vertical ribs - columns of same answer
+                    patternIndex = x % totalAnswers;
                     break;
 
                 case 'weft_rib':
-                    // Weft-faced rib
-                    patternIndex = (y % 4 < 3) ? y : x;
+                    // Horizontal ribs - rows of same answer
+                    patternIndex = y % totalAnswers;
                     break;
 
                 case 'double':
-                    // Double cloth
-                    patternIndex = ((x + y) % 4 < 2) ? x : y;
+                    // Double cloth - larger checkerboard
+                    patternIndex = (Math.floor(x / 2) + Math.floor(y / 2)) % totalAnswers;
                     break;
 
                 default:
-                    patternIndex = x + y;
+                    patternIndex = (x + y) % totalAnswers;
             }
 
-            return Math.abs(patternIndex) % totalAnswers;
+            // Ensure we always return a valid index
+            return Math.abs(Math.floor(patternIndex)) % totalAnswers;
         }
 
         // Update the weaving pattern
@@ -665,24 +671,34 @@
                 return;
             }
 
-            // Calculate grid dimensions
-            const tileSize = getTileSize(answers.length);
+            // Assign images to answers if not already assigned
+            answers.forEach(answer => {
+                if (!answerImages[answer]) {
+                    answerImages[answer] = getRandomImage();
+                }
+            });
+
+            // Calculate grid dimensions - LARGER grid for fuller appearance
+            const tileSize = 40; // Fixed size for consistency
             const cols = Math.floor(900 / tileSize);
-            const rows = Math.ceil(answers.length / 2); // Ensure enough rows
+            
+            // Create enough tiles to make a full grid (minimum 10 rows or based on answers)
+            const minTiles = cols * 10; // At least 10 rows
+            const tilesPerAnswer = Math.max(5, Math.floor(minTiles / Math.max(answers.length, 1))); // Each answer appears at least 5 times
+            const totalTiles = answers.length * tilesPerAnswer;
+            const rows = Math.ceil(totalTiles / cols);
             
             // Set grid template
             weavingPattern.style.gridTemplateColumns = `repeat(${cols}, ${tileSize}px)`;
             weavingPattern.style.gridAutoRows = `${tileSize}px`;
             weavingPattern.style.minHeight = (rows * tileSize) + 'px';
             
-            // Create tiles in a grid
-            const totalTiles = cols * rows;
-            
+            // Create tiles - each answer appears multiple times based on weave pattern
             for (let i = 0; i < totalTiles; i++) {
                 const x = i % cols;
                 const y = Math.floor(i / cols);
                 
-                // Calculate which answer to use based on weave pattern
+                // Use weave pattern to determine which answer appears at this position
                 const patternIndex = getPatternIndex(x, y, weaveStyle, answers.length);
                 const answer = answers[patternIndex];
                 
@@ -692,14 +708,14 @@
                 const tile = document.createElement('div');
                 tile.className = 'weave-tile';
                 
-                // Add image
+                // Add image - consistent image for this answer
                 const img = document.createElement('img');
-                img.src = getRandomImage();
+                img.src = answerImages[answer];
                 img.alt = '';
                 img.loading = 'eager';
                 tile.appendChild(img);
                 
-                // Add answer overlay (shows on hover)
+                // Add answer overlay
                 const overlay = document.createElement('div');
                 overlay.className = 'tile-overlay';
                 overlay.textContent = answer;
@@ -713,6 +729,12 @@
             uniqueAnswersEl.textContent = new Set(answers.map(a => a.toLowerCase().trim())).size;
             patternDensityEl.textContent = Math.min(100, Math.round(answers.length * 2.5)) + '%';
             diversityScoreEl.textContent = diversity;
+        }
+
+        // Reorder answers based on weave pattern - NO LONGER USED but keeping for reference
+        function reorderByWeavePattern(answersArray, weaveStyle, cols) {
+            // This function is no longer used since we're using getPatternIndex instead
+            return answersArray;
         }
 
         // Get random image
@@ -734,7 +756,6 @@
             return 0.8; // Common answer = smaller
         }
 
-        // Update the weaving pattern
 
         // Submit answer
         function submitAnswer() {
