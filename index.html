@@ -595,62 +595,73 @@
 
         // Calculate which answer to use for this tile based on weave pattern
         function getPatternIndex(x, y, weaveStyle, totalAnswers) {
+            if (totalAnswers === 0) return 0;
+            
             let patternIndex;
+            const cols = Math.floor(900 / 60); // Match the cols in updateWeaving (updated to 60)
 
             switch (weaveStyle) {
                 case 'plain':
-                    // Simple checkerboard alternating
-                    patternIndex = (x + y) % totalAnswers;
+                    // Checkerboard - distribute answers across diagonal lines
+                    patternIndex = Math.floor((x + y) / 2) % totalAnswers;
                     break;
 
                 case 'twill':
-                    // Diagonal lines going bottom-left to top-right
-                    patternIndex = (x + y) % totalAnswers;
+                    // Diagonal lines - each diagonal stripe is one answer
+                    patternIndex = Math.floor((x + y) / 2) % totalAnswers;
                     break;
 
                 case 'satin':
-                    // Satin weave - scattered pattern
-                    patternIndex = (x * 3 + y * 5) % totalAnswers;
+                    // Satin weave - scattered but all answers appear
+                    patternIndex = Math.floor((x * 3 + y * 5) / 3) % totalAnswers;
                     break;
 
                 case 'basket':
-                    // 2x2 basket weave blocks
-                    patternIndex = (Math.floor(x / 2) + Math.floor(y / 2)) % totalAnswers;
+                    // 2x2 basket weave blocks - distribute across blocks
+                    const blockX = Math.floor(x / 2);
+                    const blockY = Math.floor(y / 2);
+                    patternIndex = (blockX + blockY) % totalAnswers;
                     break;
 
                 case 'pointed':
-                    // Pointed twill - creates zigzag chevron
+                    // Pointed twill - zigzag chevron
                     const halfWidth = 4;
                     const zigzag = (y % (halfWidth * 2)) < halfWidth ? 
-                        (x + y) % totalAnswers : 
-                        (x - y + halfWidth) % totalAnswers;
-                    patternIndex = Math.abs(zigzag);
+                        Math.floor((x + y) / 2) % totalAnswers : 
+                        Math.floor((x - y + 100) / 2) % totalAnswers;
+                    patternIndex = Math.abs(zigzag) % totalAnswers;
                     break;
 
                 case 'herringbone':
                     // Herringbone - diagonal changes direction periodically
                     const blockSize = 6;
                     const direction = Math.floor(y / blockSize) % 2 === 0 ? 1 : -1;
-                    patternIndex = Math.abs((x + direction * y)) % totalAnswers;
+                    patternIndex = Math.floor((x + direction * y) / 2) % totalAnswers;
                     break;
 
                 case 'warp_rib':
-                    // Vertical ribs - columns of same answer
-                    patternIndex = x % totalAnswers;
+                    // Vertical ribs - distribute answers across columns
+                    // Divide columns into equal groups for each answer
+                    const colsPerAnswer = Math.max(1, Math.floor(cols / totalAnswers));
+                    patternIndex = Math.floor(x / colsPerAnswer) % totalAnswers;
                     break;
 
                 case 'weft_rib':
-                    // Horizontal ribs - rows of same answer
-                    patternIndex = y % totalAnswers;
+                    // Horizontal ribs - distribute answers across rows
+                    const rows = 20; // Updated to match new row count
+                    const rowsPerAnswer = Math.max(1, Math.floor(rows / totalAnswers));
+                    patternIndex = Math.floor(y / rowsPerAnswer) % totalAnswers;
                     break;
 
                 case 'double':
-                    // Double cloth - larger checkerboard
-                    patternIndex = (Math.floor(x / 2) + Math.floor(y / 2)) % totalAnswers;
+                    // Double cloth - larger blocks
+                    const dblBlockX = Math.floor(x / 3);
+                    const dblBlockY = Math.floor(y / 3);
+                    patternIndex = (dblBlockX + dblBlockY) % totalAnswers;
                     break;
 
                 default:
-                    patternIndex = (x + y) % totalAnswers;
+                    patternIndex = Math.floor((x + y) / 2) % totalAnswers;
             }
 
             // Ensure we always return a valid index
@@ -678,29 +689,48 @@
                 }
             });
 
-            // Calculate grid dimensions - LARGER grid for fuller appearance
-            const tileSize = 40; // Fixed size for consistency
+            // Calculate grid dimensions
+            const tileSize = 60; // Increased from 40 to 60 (50% bigger)
             const cols = Math.floor(900 / tileSize);
-            
-            // Create enough tiles to make a full grid (minimum 10 rows or based on answers)
-            const minTiles = cols * 10; // At least 10 rows
-            const tilesPerAnswer = Math.max(5, Math.floor(minTiles / Math.max(answers.length, 1))); // Each answer appears at least 5 times
-            const totalTiles = answers.length * tilesPerAnswer;
-            const rows = Math.ceil(totalTiles / cols);
+            const rows = 20; // Increased from 15 to 20 (more rows)
+            const totalTiles = cols * rows;
             
             // Set grid template
             weavingPattern.style.gridTemplateColumns = `repeat(${cols}, ${tileSize}px)`;
             weavingPattern.style.gridAutoRows = `${tileSize}px`;
             weavingPattern.style.minHeight = (rows * tileSize) + 'px';
             
-            // Create tiles - each answer appears multiple times based on weave pattern
+            // Create an array to store which answer goes in each position
+            const tileAssignments = new Array(totalTiles);
+            
+            // STEP 1: Ensure every answer appears at least once
+            // Place each answer in a position determined by the pattern
+            const answerPositions = [];
+            for (let i = 0; i < answers.length; i++) {
+                // Find a good position for this answer based on the pattern
+                // Spread them out evenly across the grid
+                const idealPosition = Math.floor((i * totalTiles) / answers.length);
+                answerPositions.push(idealPosition);
+                tileAssignments[idealPosition] = i;
+            }
+            
+            // STEP 2: Fill remaining positions with pattern
             for (let i = 0; i < totalTiles; i++) {
+                // Skip if already assigned in step 1
+                if (tileAssignments[i] !== undefined) continue;
+                
                 const x = i % cols;
                 const y = Math.floor(i / cols);
                 
-                // Use weave pattern to determine which answer appears at this position
-                const patternIndex = getPatternIndex(x, y, weaveStyle, answers.length);
-                const answer = answers[patternIndex];
+                // Use pattern to determine which answer
+                const answerIndex = getPatternIndex(x, y, weaveStyle, answers.length);
+                tileAssignments[i] = answerIndex;
+            }
+            
+            // STEP 3: Create tiles based on assignments
+            for (let i = 0; i < totalTiles; i++) {
+                const answerIndex = tileAssignments[i];
+                const answer = answers[answerIndex];
                 
                 if (!answer) continue;
                 
@@ -729,12 +759,6 @@
             uniqueAnswersEl.textContent = new Set(answers.map(a => a.toLowerCase().trim())).size;
             patternDensityEl.textContent = Math.min(100, Math.round(answers.length * 2.5)) + '%';
             diversityScoreEl.textContent = diversity;
-        }
-
-        // Reorder answers based on weave pattern - NO LONGER USED but keeping for reference
-        function reorderByWeavePattern(answersArray, weaveStyle, cols) {
-            // This function is no longer used since we're using getPatternIndex instead
-            return answersArray;
         }
 
         // Get random image
@@ -847,7 +871,7 @@
                 const weavingCanvas = document.querySelector('.weaving-canvas');
                 
                 const canvas = await html2canvas(weavingCanvas, {
-                    backgroundColor: 'rgba(42, 24, 16, 1)',
+                    backgroundColor: '#500c32', // Dark purple from color scheme
                     scale: 6, // Even higher quality (6x resolution)
                     logging: true,
                     useCORS: true,
@@ -864,6 +888,7 @@
                         const clonedCanvas = clonedDoc.querySelector('.weaving-canvas');
                         if (clonedCanvas) {
                             clonedCanvas.style.imageRendering = 'high-quality';
+                            clonedCanvas.style.backgroundColor = '#500c32'; // Match dark purple
                         }
                         // Force all images to render at full quality
                         const images = clonedDoc.querySelectorAll('.weave-thread');
