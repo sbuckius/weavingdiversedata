@@ -13,18 +13,20 @@
         }
 
         :root {
-            --warp: #2a1810;
-            --weft: #f4e8d8;
-            --thread-gold: #d4a574;
-            --thread-indigo: #3d5a80;
-            --thread-rust: #c1666b;
-            --thread-sage: #95a792;
+            --primary: #9d4479;
+            --secondary: #b950b2;
+            --accent1: #a37bb9;
+            --accent2: #af306e;
+            --dark1: #62022f;
+            --dark2: #500c32;
+            --mid: #aa6391;
+            --light: #e9bed9;
         }
 
         body {
             font-family: 'Crimson Pro', serif;
-            background: linear-gradient(135deg, #1a1410 0%, #2a1810 100%);
-            color: var(--weft);
+            background: linear-gradient(135deg, var(--dark2) 0%, var(--dark1) 100%);
+            color: var(--light);
             min-height: 100vh;
             padding: 20px;
         }
@@ -38,8 +40,8 @@
             text-align: center;
             margin-bottom: 40px;
             padding: 30px;
-            background: rgba(244, 232, 216, 0.03);
-            border: 1px solid rgba(244, 232, 216, 0.1);
+            background: rgba(233, 190, 217, 0.05);
+            border: 1px solid rgba(233, 190, 217, 0.15);
             border-radius: 2px;
         }
 
@@ -48,7 +50,7 @@
             font-weight: 300;
             letter-spacing: 0.05em;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--thread-gold), var(--thread-rust));
+            background: linear-gradient(135deg, var(--secondary), var(--accent2));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -70,9 +72,9 @@
         }
 
         .question-panel {
-            background: rgba(244, 232, 216, 0.05);
+            background: rgba(233, 190, 217, 0.08);
             padding: 30px;
-            border: 1px solid rgba(244, 232, 216, 0.15);
+            border: 1px solid rgba(233, 190, 217, 0.2);
             border-radius: 2px;
         }
 
@@ -97,9 +99,9 @@
             padding: 20px;
             font-family: 'Crimson Pro', serif;
             font-size: 1.2em;
-            background: rgba(244, 232, 216, 0.08);
-            border: 2px solid rgba(244, 232, 216, 0.2);
-            color: var(--weft);
+            background: rgba(233, 190, 217, 0.1);
+            border: 2px solid rgba(233, 190, 217, 0.3);
+            color: var(--light);
             border-radius: 2px;
             margin-bottom: 20px;
             transition: all 0.3s ease;
@@ -107,8 +109,8 @@
 
         #answerInput:focus {
             outline: none;
-            border-color: var(--thread-gold);
-            background: rgba(244, 232, 216, 0.12);
+            border-color: var(--secondary);
+            background: rgba(233, 190, 217, 0.15);
         }
 
         #submitAnswer {
@@ -118,9 +120,9 @@
             font-size: 0.9em;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            background: linear-gradient(135deg, var(--thread-gold), var(--thread-rust));
+            background: linear-gradient(135deg, var(--primary), var(--accent2));
             border: none;
-            color: var(--warp);
+            color: var(--light);
             cursor: pointer;
             border-radius: 2px;
             transition: all 0.3s ease;
@@ -129,7 +131,7 @@
 
         #submitAnswer:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(212, 165, 116, 0.3);
+            box-shadow: 0 10px 30px rgba(185, 80, 178, 0.4);
         }
 
         #submitAnswer:active {
@@ -143,9 +145,9 @@
             font-size: 0.9em;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            background: linear-gradient(135deg, var(--thread-indigo), var(--thread-sage));
+            background: linear-gradient(135deg, var(--accent1), var(--mid));
             border: none;
-            color: var(--weft);
+            color: var(--light);
             cursor: pointer;
             border-radius: 2px;
             transition: all 0.3s ease;
@@ -155,7 +157,7 @@
 
         #exportButton:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(61, 90, 128, 0.3);
+            box-shadow: 0 10px 30px rgba(163, 123, 185, 0.4);
         }
 
         #exportButton:active {
@@ -182,13 +184,13 @@
         }
 
         .stat-value {
-            color: var(--thread-gold);
+            color: var(--secondary);
             font-weight: 700;
         }
 
         .weaving-canvas {
-            background: rgba(244, 232, 216, 0.02);
-            border: 1px solid rgba(244, 232, 216, 0.15);
+            background: rgba(233, 190, 217, 0.03);
+            border: 1px solid rgba(233, 190, 217, 0.2);
             border-radius: 2px;
             padding: 20px;
             min-height: 600px;
@@ -207,32 +209,34 @@
         }
 
         #weavingPattern {
-            display: grid;
-            gap: -2px;
+            position: relative;
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            position: relative;
+            min-height: 600px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 40px);
+            grid-auto-rows: 40px;
+            gap: 0;
+            background: rgba(233, 190, 217, 0.08);
         }
 
-        .weave-thread {
+        .weave-tile {
             position: relative;
-            aspect-ratio: 1;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            border-radius: 1px;
-            transition: all 0.5s ease;
         }
 
-        .weave-thread img {
+        .weave-tile img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             object-position: center;
-            image-rendering: -webkit-optimize-contrast;
             image-rendering: high-quality;
         }
 
-        .thread-overlay {
+        .tile-overlay {
             position: absolute;
             top: 0;
             left: 0;
@@ -242,24 +246,28 @@
             align-items: center;
             justify-content: center;
             font-family: 'Crimson Pro', serif;
-            font-size: 0.7em;
+            font-size: 0.5em;
             color: var(--weft);
             text-align: center;
-            padding: 5px;
-            background: linear-gradient(135deg, 
-                rgba(42, 24, 16, 0.65), 
-                rgba(42, 24, 16, 0.55));
+            padding: 2px;
+            background: none;
             word-break: break-word;
-            line-height: 1.2;
-            font-weight: 400;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            line-height: 1.1;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 1),
+                         0 0 8px rgba(0, 0, 0, 0.8),
+                         1px 1px 0 rgba(0, 0, 0, 1),
+                         -1px -1px 0 rgba(0, 0, 0, 1),
+                         1px -1px 0 rgba(0, 0, 0, 1),
+                         -1px 1px 0 rgba(0, 0, 0, 1);
+            opacity: 1;
         }
 
         .legend {
             margin-top: 30px;
             padding: 20px;
-            background: rgba(244, 232, 216, 0.03);
-            border: 1px solid rgba(244, 232, 216, 0.1);
+            background: rgba(233, 190, 217, 0.05);
+            border: 1px solid rgba(233, 190, 217, 0.15);
             border-radius: 2px;
         }
 
@@ -287,9 +295,9 @@
             margin-top: 20px;
             padding: 15px;
             background: linear-gradient(135deg, 
-                rgba(212, 165, 116, 0.1), 
-                rgba(193, 102, 107, 0.1));
-            border-left: 3px solid var(--thread-gold);
+                rgba(185, 80, 178, 0.15), 
+                rgba(175, 48, 110, 0.15));
+            border-left: 3px solid var(--secondary);
             border-radius: 2px;
         }
 
@@ -304,7 +312,7 @@
 
         .diversity-value {
             font-size: 1.5em;
-            color: var(--thread-gold);
+            color: var(--secondary);
             font-weight: 600;
         }
 
@@ -338,7 +346,7 @@
 
     <div class="container">
         <header>
-            <h1>Weaving Answers</h1>
+            <h1>Weaving Diverse Data</h1>
             <div class="subtitle">Interactive Data Textile</div>
             <div style="margin-top: 15px; font-family: 'Space Mono', monospace; font-size: 0.8em; opacity: 0.6;">
                 <span id="onlineCount">🌐 Connecting...</span>
@@ -351,8 +359,23 @@
                 <div id="currentQuestion">Does AI make you more efficient in your work?</div>
                 
                 <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
-                <button id="submitAnswer">Weave Answer</button>
+                <button id="submitAnswer">Weave Data</button>
                 <button id="exportButton">📸 Export Textile as PNG</button>
+
+                <div style="margin-top: 15px;">
+                    <label style="font-family: 'Space Mono', monospace; font-size: 0.75em; letter-spacing: 0.1em; opacity: 0.7; display: block; margin-bottom: 8px;">WEAVE PATTERN:</label>
+                    <select id="weavePattern" style="width: 100%; padding: 12px; font-family: 'Crimson Pro', serif; font-size: 1em; background: rgba(233, 190, 217, 0.1); border: 2px solid rgba(233, 190, 217, 0.3); color: #e9bed9; border-radius: 2px;">
+                        <option value="plain">Plain Weave</option>
+                        <option value="twill" selected>Twill</option>
+                        <option value="satin">Satin</option>
+                        <option value="basket">Basket Weave</option>
+                        <option value="pointed">Pointed Twill</option>
+                        <option value="herringbone">Herringbone</option>
+                        <option value="warp_rib">Warp Rib</option>
+                        <option value="weft_rib">Weft Rib</option>
+                        <option value="double">Double Cloth</option>
+                    </select>
+                </div>
 
                 <div class="stats">
                     <div class="stat-item">
@@ -523,69 +546,144 @@
             return (diversityRatio * 0.7 + lengthDiversity * 0.3).toFixed(2);
         }
 
-        // Get weaving pattern type based on diversity
+        // Get weaving pattern type based on diversity (for automatic selection)
         function getPatternType(diversity) {
-            if (diversity > 0.8) return 'jacquard';
-            if (diversity > 0.6) return 'herringbone';
-            if (diversity > 0.4) return 'twill';
-            return 'plaid';
+            if (diversity > 0.8) return 'pointed';
+            if (diversity > 0.6) return 'twill';
+            if (diversity > 0.4) return 'basket';
+            return 'plain';
         }
 
-        // Calculate weaving pattern for each thread
-        function getWeavePattern(index, total, patternType) {
-            const row = Math.floor(index / Math.ceil(Math.sqrt(total)));
-            const col = index % Math.ceil(Math.sqrt(total));
-            
-            switch(patternType) {
-                case 'jacquard':
-                    // Complex pattern - unique for each answer
-                    return {
-                        rotation: (index * 17) % 360,
-                        offsetX: (Math.sin(index) * 5),
-                        offsetY: (Math.cos(index) * 5),
-                        weaveOver: (row + col) % 3 === 0
-                    };
-                    
-                case 'herringbone':
-                    // Diagonal zigzag pattern
-                    const diagonal = (row + col) % 8;
-                    return {
-                        rotation: diagonal < 4 ? 45 : -45,
-                        offsetX: (col % 2) * 3,
-                        offsetY: (row % 2) * 3,
-                        weaveOver: diagonal % 2 === 0
-                    };
-                    
+        // Get tile size based on number of answers (more answers = smaller tiles)
+        function getTileSize(answerCount) {
+            if (answerCount < 10) return 60;
+            if (answerCount < 25) return 50;
+            if (answerCount < 50) return 40;
+            if (answerCount < 100) return 35;
+            return 30;
+        }
+
+        // Calculate which answer to use for this tile based on weave pattern
+        function getPatternIndex(x, y, weaveStyle, totalAnswers) {
+            let patternIndex;
+
+            switch (weaveStyle) {
+                case 'plain':
+                    // Simple alternating
+                    patternIndex = ((x + y) % 2 === 0) ? x : y;
+                    break;
+
                 case 'twill':
-                    // Diagonal lines pattern (over 2, under 2)
-                    return {
-                        rotation: ((row + col) % 4) * 5,
-                        offsetX: col * 0.5,
-                        offsetY: row * 0.5,
-                        weaveOver: (row + col) % 4 < 2
-                    };
-                    
-                case 'plaid':
-                    // Simple over-under grid
-                    return {
-                        rotation: 0,
-                        offsetX: (col % 2) * 2,
-                        offsetY: (row % 2) * 2,
-                        weaveOver: (row + col) % 2 === 0
-                    };
+                    // Diagonal lines
+                    patternIndex = (x + y);
+                    break;
+
+                case 'satin':
+                    // Satin weave (5-shaft)
+                    patternIndex = (x * 5 + y * 3);
+                    break;
+
+                case 'basket':
+                    // 2x2 basket weave
+                    patternIndex = ((Math.floor(x / 2) + Math.floor(y / 2)) % 2 === 0) ? x : y;
+                    break;
+
+                case 'pointed':
+                    // Pointed twill (zigzag)
+                    const zig = Math.abs((x % 8) - 4);
+                    patternIndex = (y % 8 === zig) ? x : y;
+                    break;
+
+                case 'herringbone':
+                    // Herringbone (directional twill)
+                    const dir = (Math.floor(y / 8) % 2 === 0) ? 1 : -1;
+                    patternIndex = (x + dir * y);
+                    break;
+
+                case 'warp_rib':
+                    // Warp-faced rib
+                    patternIndex = (x % 4 < 3) ? x : y;
+                    break;
+
+                case 'weft_rib':
+                    // Weft-faced rib
+                    patternIndex = (y % 4 < 3) ? y : x;
+                    break;
+
+                case 'double':
+                    // Double cloth
+                    patternIndex = ((x + y) % 4 < 2) ? x : y;
+                    break;
+
+                default:
+                    patternIndex = x + y;
             }
+
+            return Math.abs(patternIndex) % totalAnswers;
         }
 
-        // Get grid columns based on pattern and thread count
-        function getGridColumns(patternType, count) {
-            if (count <= 4) return 2;
-            if (count <= 9) return 3;
-            if (count <= 16) return 4;
-            if (count <= 25) return 5;
-            if (patternType === 'jacquard') return Math.min(8, Math.ceil(Math.sqrt(count)));
-            if (patternType === 'herringbone') return Math.min(7, Math.ceil(Math.sqrt(count)));
-            if (patternType === 'twill') return Math.min(6, Math.ceil(Math.sqrt(count)));
-            return Math.min(5, Math.ceil(Math.sqrt(count)));
+        // Update the weaving pattern
+        function updateWeaving() {
+            const diversity = calculateDiversity();
+            const weaveSelector = document.getElementById('weavePattern');
+            const weaveStyle = weaveSelector ? weaveSelector.value : 'twill';
+            
+            // Clear and rebuild
+            weavingPattern.innerHTML = '';
+            
+            if (answers.length === 0) {
+                weavingPattern.style.minHeight = '400px';
+                return;
+            }
+
+            // Calculate grid dimensions
+            const tileSize = getTileSize(answers.length);
+            const cols = Math.floor(900 / tileSize);
+            const rows = Math.ceil(answers.length / 2); // Ensure enough rows
+            
+            // Set grid template
+            weavingPattern.style.gridTemplateColumns = `repeat(${cols}, ${tileSize}px)`;
+            weavingPattern.style.gridAutoRows = `${tileSize}px`;
+            weavingPattern.style.minHeight = (rows * tileSize) + 'px';
+            
+            // Create tiles in a grid
+            const totalTiles = cols * rows;
+            
+            for (let i = 0; i < totalTiles; i++) {
+                const x = i % cols;
+                const y = Math.floor(i / cols);
+                
+                // Calculate which answer to use based on weave pattern
+                const patternIndex = getPatternIndex(x, y, weaveStyle, answers.length);
+                const answer = answers[patternIndex];
+                
+                if (!answer) continue;
+                
+                // Create tile
+                const tile = document.createElement('div');
+                tile.className = 'weave-tile';
+                
+                // Add image
+                const img = document.createElement('img');
+                img.src = getRandomImage();
+                img.alt = '';
+                img.loading = 'eager';
+                tile.appendChild(img);
+                
+                // Add answer overlay (shows on hover)
+                const overlay = document.createElement('div');
+                overlay.className = 'tile-overlay';
+                overlay.textContent = answer;
+                tile.appendChild(overlay);
+                
+                weavingPattern.appendChild(tile);
+            }
+            
+            // Update stats
+            totalThreadsEl.textContent = answers.length;
+            uniqueAnswersEl.textContent = new Set(answers.map(a => a.toLowerCase().trim())).size;
+            patternDensityEl.textContent = Math.min(100, Math.round(answers.length * 2.5)) + '%';
+            diversityScoreEl.textContent = diversity;
         }
 
         // Get random image
@@ -608,71 +706,6 @@
         }
 
         // Update the weaving pattern
-        function updateWeaving() {
-            const diversity = calculateDiversity();
-            const patternType = getPatternType(diversity);
-            const columns = getGridColumns(patternType, answers.length);
-            
-            weavingPattern.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-            
-            // Clear and rebuild
-            weavingPattern.innerHTML = '';
-            
-            answers.forEach((answer, index) => {
-                const thread = document.createElement('div');
-                thread.className = 'weave-thread new';
-                
-                // Get weaving pattern for this position
-                const pattern = getWeavePattern(index, answers.length, patternType);
-                
-                // Create actual img element instead of background-image
-                const img = document.createElement('img');
-                const imagePath = getRandomImage();
-                img.src = imagePath;
-                img.alt = '';
-                img.loading = 'eager';
-                
-                // Apply weaving pattern transforms
-                img.style.transform = `rotate(${pattern.rotation}deg)`;
-                
-                thread.appendChild(img);
-                
-                // Apply pattern positioning
-                thread.style.transform = `translateX(${pattern.offsetX}px) translateY(${pattern.offsetY}px)`;
-                
-                // Size based on uniqueness
-                const size = getThreadSize(answer);
-                const finalScale = size;
-                thread.style.transform += ` scale(${finalScale})`;
-                
-                // Z-index for over/under weaving
-                thread.style.zIndex = pattern.weaveOver ? 
-                    100 + Math.floor(size * 10) : 
-                    50 + Math.floor(size * 10);
-                
-                // Add subtle shadow for depth
-                if (pattern.weaveOver) {
-                    thread.style.filter = 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))';
-                }
-                
-                // Answer overlay
-                const overlay = document.createElement('div');
-                overlay.className = 'thread-overlay';
-                overlay.textContent = answer;
-                thread.appendChild(overlay);
-                
-                weavingPattern.appendChild(thread);
-                
-                // Remove 'new' class after animation
-                setTimeout(() => thread.classList.remove('new'), 300);
-            });
-            
-            // Update stats
-            totalThreadsEl.textContent = answers.length;
-            uniqueAnswersEl.textContent = new Set(answers.map(a => a.toLowerCase().trim())).size;
-            patternDensityEl.textContent = Math.min(100, Math.round(answers.length * 2.5)) + '%';
-            diversityScoreEl.textContent = diversity;
-        }
 
         // Submit answer
         function submitAnswer() {
@@ -794,6 +827,9 @@
         // Event listeners
         submitBtn.addEventListener('click', submitAnswer);
         document.getElementById('exportButton').addEventListener('click', exportTextile);
+        document.getElementById('weavePattern').addEventListener('change', () => {
+            updateWeaving();
+        });
         answerInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') submitAnswer();
         });
