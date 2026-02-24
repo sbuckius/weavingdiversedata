@@ -164,6 +164,32 @@
             transform: translateY(0);
         }
 
+        #exportTiledButton {
+            width: 100%;
+            padding: 18px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9em;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--mid), var(--primary));
+            border: none;
+            color: var(--light);
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            margin-top: 15px;
+        }
+
+        #exportTiledButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(170, 99, 145, 0.4);
+        }
+
+        #exportTiledButton:active {
+            transform: translateY(0);
+        }
+
         #adminResetButton {
             width: 100%;
             padding: 12px;
@@ -388,6 +414,7 @@
                 <input type="text" id="answerInput" placeholder="Type your answer here..." autocomplete="off">
                 <button id="submitAnswer">Weave Data</button>
                 <button id="exportButton">📸 Export Textile as PNG</button>
+                <button id="exportTiledButton">🔲 Export Tiled Textile (3×3)</button>
 
                 <div style="margin-top: 15px;">
                     <label style="font-family: 'Space Mono', monospace; font-size: 0.75em; letter-spacing: 0.1em; opacity: 0.7; display: block; margin-bottom: 8px;">WEAVE PATTERN:</label>
@@ -935,9 +962,97 @@
             }
         }
 
+        // Export tiled textile (3x3 grid of the weaving)
+        async function exportTiledTextile() {
+            const exportBtn = document.getElementById('exportTiledButton');
+            const originalText = exportBtn.textContent;
+            
+            try {
+                exportBtn.textContent = '⏳ Creating tiled version...';
+                exportBtn.disabled = true;
+                
+                // Wait a moment for any images to finish loading
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const weavingCanvas = document.querySelector('.weaving-canvas');
+                
+                // First capture the single weaving
+                const singleCanvas = await html2canvas(weavingCanvas, {
+                    backgroundColor: '#500c32',
+                    scale: 4, // Slightly lower scale since we're making it bigger
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    foreignObjectRendering: false,
+                    imageTimeout: 20000,
+                    removeContainer: true,
+                    width: weavingCanvas.offsetWidth,
+                    height: weavingCanvas.offsetHeight,
+                    windowWidth: weavingCanvas.scrollWidth,
+                    windowHeight: weavingCanvas.scrollHeight
+                });
+                
+                // Create a larger canvas for the 3x3 tiled version
+                const tilesX = 3;
+                const tilesY = 3;
+                const tiledCanvas = document.createElement('canvas');
+                tiledCanvas.width = singleCanvas.width * tilesX;
+                tiledCanvas.height = singleCanvas.height * tilesY;
+                const ctx = tiledCanvas.getContext('2d');
+                
+                // Fill background
+                ctx.fillStyle = '#500c32';
+                ctx.fillRect(0, 0, tiledCanvas.width, tiledCanvas.height);
+                
+                // Tile the weaving in a 3x3 grid
+                for (let y = 0; y < tilesY; y++) {
+                    for (let x = 0; x < tilesX; x++) {
+                        ctx.drawImage(
+                            singleCanvas,
+                            x * singleCanvas.width,
+                            y * singleCanvas.height
+                        );
+                    }
+                }
+                
+                // Convert to PNG and download
+                tiledCanvas.toBlob((blob) => {
+                    if (!blob) {
+                        throw new Error('Failed to create tiled image blob');
+                    }
+                    
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    link.download = `weaving-textile-tiled-${timestamp}.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    
+                    exportBtn.textContent = '✅ Tiled Export Complete!';
+                    setTimeout(() => {
+                        exportBtn.textContent = originalText;
+                        exportBtn.disabled = false;
+                    }, 2000);
+                }, 'image/png', 1.0);
+                
+            } catch (error) {
+                console.error('Tiled export error:', error);
+                
+                exportBtn.textContent = '❌ Export failed';
+                setTimeout(() => {
+                    exportBtn.textContent = originalText;
+                    exportBtn.disabled = false;
+                }, 3000);
+                
+                alert('Tiled export failed. Check console for details.');
+            }
+        }
+
         // Event listeners
         submitBtn.addEventListener('click', submitAnswer);
         document.getElementById('exportButton').addEventListener('click', exportTextile);
+        document.getElementById('exportTiledButton').addEventListener('click', exportTiledTextile);
         document.getElementById('adminResetButton').addEventListener('click', adminReset);
         document.getElementById('weavePattern').addEventListener('change', () => {
             updateWeaving();
